@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:NoLate.Models"
+             x:Class="NoLate.MainPage"
+             BackgroundColor="{StaticResource Background}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="30,0" Spacing="25">
+
+            <Image Source="dotnet_bot.png"
+                   HeightRequest="185"
+                   Aspect="AspectFit" />
+
+            <Label Text="NoLate"
+                   Style="{StaticResource Headline}"
+                   TextColor="{StaticResource OnSurface}" />
+
+            <Label Text="No late"
+                   Style="{StaticResource SubHeadline}"
+                   TextColor="{StaticResource OnSurfaceVariant}" />
+
+            <!-- Кнопка добавления -->
+            <ImageButton Source="add_button.png"
+                         BackgroundColor="{StaticResource Primary}"
+                         HeightRequest="60"
+                         WidthRequest="200"
+                         CornerRadius="30"
+                         Padding="5"
+                         Margin="0,20,0,0"
+                         Clicked="OnAddClicked"
+                         SemanticProperties.Hint="Добавить будильник" />
+
+            <!-- Список -->
+            <CollectionView x:Name="AlarmsCollection"
+                            SelectionMode="Single"
+                            SelectionChanged="OnAlarmSelected"
+                            HeightRequest="400">
+
+                <!-- Пустой список -->
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Spacing="10"
+                                         Padding="20"
+                                         HorizontalOptions="Center"
+                                         VerticalOptions="Center">
+                        <Label Text="Пока нет будильников. Повезло..."
+                               TextColor="{StaticResource OnSurfaceVariant}"
+                               FontSize="16"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:AlarmModel">
+                        <Border Margin="0,5"
+                                Padding="15"
+                                StrokeShape="RoundRectangle 12"
+                                BackgroundColor="{StaticResource Surface}"
+                                Stroke="#E0E0E0" 
+                                StrokeThickness="1">
+
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+
+                                <!-- Адрес -->
+                                <Label Grid.Row="0" Grid.Column="0"
+                                       Text="{Binding Mesto}"
+                                       FontAttributes="Bold"
+                                       FontSize="16"
+                                       TextColor="{StaticResource OnSurface}" />
+
+                                <!-- Время прибытия -->
+                                <Label Grid.Row="1" Grid.Column="0"
+                                       Text="{Binding MestTime, StringFormat='Ко времени: {0:dd.MM HH:mm}'}"
+                                       FontSize="14"
+                                       TextColor="{StaticResource OnSurfaceVariant}" />
+
+                                <!-- В пути -->
+                                <Label Grid.Row="2" Grid.Column="0"
+                                       Text="{Binding TravelTime, StringFormat='В пути: {0} мин + {1} мин сборы'}"
+                                       FontSize="12"
+                                       TextColor="{StaticResource Secondary}" />
+
+                                <!-- Время будильника -->
+                                <Label Grid.Row="0" Grid.Column="1"
+                                       Grid.RowSpan="2"
+                                       Text="{Binding AlarmTime, StringFormat='{0:HH:mm}'}"
+                                       FontSize="24"
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource Primary}"
+                                       HorizontalTextAlignment="End" />
+
+                                <!-- Свич -->
+                                <Switch Grid.Row="2" Grid.Column="1"
+                                        IsToggled="{Binding IsActive, Mode=TwoWay}"
+                                        Toggled="OnSwitchToggled"
+                                        HorizontalOptions="End" />
+
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
