@@ -11,6 +11,9 @@ namespace NoLate.Models
         // Адрес
         public string? Mesto { get; set; }
 
+        // В пути
+        public string TravelTimeText => $"В пути: {TravelTime} мин + {DopTime} мин";
+
         // Время к скольки те приперется надо
         public DateTime MestTime { get; set; }
 

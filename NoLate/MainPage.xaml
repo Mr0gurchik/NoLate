@@ -2,38 +2,24 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:NoLate.Models"
+             xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
              x:Class="NoLate.MainPage"
+             Shell.NavBarIsVisible="False"
              BackgroundColor="{StaticResource Background}">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="30,0" Spacing="25">
+    <ContentPage.Behaviors>
+        <toolkit:StatusBarBehavior 
+            StatusBarColor="Transparent" 
+            StatusBarStyle="DarkContent" />
+    </ContentPage.Behaviors>
 
-            <Image Source="dotnet_bot.png"
-                   HeightRequest="185"
-                   Aspect="AspectFit" />
+    <Grid RowDefinitions="*, Auto" Padding="20" Margin="0,40,0,0">
 
-            <Label Text="NoLate"
-                   Style="{StaticResource Headline}"
-                   TextColor="{StaticResource OnSurface}" />
-
-            <Label Text="No late"
-                   Style="{StaticResource SubHeadline}"
-                   TextColor="{StaticResource OnSurfaceVariant}" />
-
-            <!-- Кнопка добавления -->
-            <ImageButton Source="add_button.png"
-                BackgroundColor="Transparent" 
-                HeightRequest="60"
-                WidthRequest="200"
-                Aspect="AspectFit"
-                Margin="0,20,0,0"
-                Clicked="OnAddClicked" />
-
-            <!-- Список -->
+        <!-- Список -->
             <CollectionView x:Name="AlarmsCollection"
-                            SelectionMode="Single"
-                            SelectionChanged="OnAlarmSelected"
-                            HeightRequest="400">
+                        Grid.Row="0"
+                        SelectionMode="Single"
+                        SelectionChanged="OnAlarmSelected">
 
                 <!-- Пустой список -->
                 <CollectionView.EmptyView>
@@ -70,15 +56,15 @@
                                 <Label Grid.Row="1" Grid.Column="0"
                                        Text="{Binding MestTime, StringFormat='Ко времени: {0:dd.MM HH:mm}'}"
                                        FontSize="14"
-                                       TextColor="{StaticResource OnSurfaceVariant}" />
+                                       TextColor="{StaticResource Primary}" />
 
                                 <!-- В пути -->
                                 <Label Grid.Row="2" Grid.Column="0"
-                                       Text="{Binding TravelTime, StringFormat='В пути: {0} мин + {1} мин сборы'}"
+                                       Text="{Binding TravelTimeText}"
                                        FontSize="12"
-                                       TextColor="{StaticResource Secondary}" />
+                                       TextColor="{StaticResource Primary}" />
 
-                                <!-- Время будильника -->
+                            <!-- Время будильника -->
                                 <Label Grid.Row="0" Grid.Column="1"
                                        Grid.RowSpan="2"
                                        Text="{Binding AlarmTime, StringFormat='{0:HH:mm}'}"
@@ -91,6 +77,8 @@
                                 <Switch Grid.Row="2" Grid.Column="1"
                                         IsToggled="{Binding IsActive, Mode=TwoWay}"
                                         Toggled="OnSwitchToggled"
+                                        OnColor="#FF8C00"
+                                        ThumbColor="White"
                                         HorizontalOptions="End" />
 
                             </Grid>
@@ -98,8 +86,17 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
+        
+        <!-- Кнопка добавления -->
+        <ImageButton Grid.Row="1"
+             Source="add_button.png"
+             BackgroundColor="Transparent"
+             HeightRequest="80"
+             HorizontalOptions="Fill" 
+             Margin="40,15,40,20"
+             Aspect="AspectFit"
+             Clicked="OnAddClicked" />
 
-        </VerticalStackLayout>
-    </ScrollView>
+    </Grid>
 
 </ContentPage>
