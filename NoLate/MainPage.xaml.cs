@@ -87,11 +87,9 @@ public partial class MainPage : ContentPage
                     break;
             }
 
-            AlarmsCollection.SelectedItem = null; // Сброс выделения
+            AlarmsCollection.SelectedItem = null;
         }
     }
-
-    // Обработчик переключателя (чтобы не сбивались настройки)
     private async void OnSwitchToggled(object sender, ToggledEventArgs e)
     {
         if (sender is Switch switchControl && switchControl.BindingContext is AlarmModel alarm)

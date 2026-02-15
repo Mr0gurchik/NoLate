@@ -22,14 +22,12 @@
 
             <!-- Кнопка добавления -->
             <ImageButton Source="add_button.png"
-                         BackgroundColor="{StaticResource Primary}"
-                         HeightRequest="60"
-                         WidthRequest="200"
-                         CornerRadius="30"
-                         Padding="5"
-                         Margin="0,20,0,0"
-                         Clicked="OnAddClicked"
-                         SemanticProperties.Hint="Добавить будильник" />
+                BackgroundColor="Transparent" 
+                HeightRequest="60"
+                WidthRequest="200"
+                Aspect="AspectFit"
+                Margin="0,20,0,0"
+                Clicked="OnAddClicked" />
 
             <!-- Список -->
             <CollectionView x:Name="AlarmsCollection"
