@@ -28,7 +28,7 @@
                                          HorizontalOptions="Center"
                                          VerticalOptions="Center">
                         <Label Text="Пока нет будильников. Повезло..."
-                               TextColor="{StaticResource OnSurfaceVariant}"
+                               TextColor="{StaticResource OnSurface}"
                                FontSize="16"
                                HorizontalOptions="Center" />
                     </VerticalStackLayout>

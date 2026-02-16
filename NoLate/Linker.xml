@@ -1,0 +1,8 @@
+<linker>
+    <assembly fullname="NoLate" />
+    <assembly fullname="CommunityToolkit.Maui" />
+    <assembly fullname="CommunityToolkit.Maui.Core" />
+    <assembly fullname="Microsoft.Maui.Controls" />
+    <assembly fullname="Microsoft.Maui.Controls.Xaml" />
+    <assembly fullname="System.Core" />
+</linker>
