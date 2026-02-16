@@ -37,59 +37,39 @@ public partial class MainPage : ContentPage
     // Кнопка добавления
     private async void OnAddClicked(object sender, EventArgs e)
     {
-        await DisplayAlert("Добавить будильник",
-            "Экран создания будет позже.\n" +
-            "Создаём тестовый будильник.", "OK");
-
-        var newAlarm = new AlarmModel()
-        {
-            Mesto = "Работа",
-            MestTime = DateTime.Now.AddHours(3),
-            AlarmTime = DateTime.Now.AddHours(2),
-            TravelTime = 60,
-            DopTime = 30,
-            Transport = "Авто",
-            IsActive = true
-        };
-
-        await _database.SaveAlarmAsync(newAlarm);
-        await LoadAlarmsAsync();
+        await Shell.Current.GoToAsync(nameof(AlarmEditPage));
     }
+
 
     // Клик по будильнику в списке
     private async void OnAlarmSelected(object sender, SelectionChangedEventArgs e)
     {
         if (e.CurrentSelection.FirstOrDefault() is AlarmModel alarm)
         {
-            var action = await DisplayActionSheet("Действия", "Отмена", null,
-                "👁 Подробности", "🗑 Удалить");
+            string action = await DisplayActionSheet($"Будильник: {alarm.Mesto}", "Отмена", null, "Редактировать", "Удалить");
 
-            switch (action)
+            if (action == "Редактировать")
             {
-                case "👁 Подробности":
-                    await DisplayAlert("Будильник",
-                        $"📍 {alarm.Mesto}\n" +
-                        $"🏁 Прибыть: {alarm.MestTime:HH:mm}\n" +
-                        $"⏰ Подъём: {alarm.AlarmTime:HH:mm}",
-                        "OK");
-                    break;
-
-                case "🗑 Удалить":
-                    var confirm = await DisplayAlert("Удалить?",
-                        $"Удалить '{alarm.Mesto}'?", "Да", "Нет");
-
-                    if (confirm)
+                await Shell.Current.GoToAsync($"{nameof(AlarmEditPage)}?Id={alarm.Id}");
+            }
+            else if (action == "Удалить")
+            {
+                bool confirm = await DisplayAlert("Удаление", $"Удалить {alarm.Mesto}?", "Да", "Нет");
+                if (confirm)
+                {
+                    await Task.Run(() => _database.DeleteAlarmAsync(alarm));
+                    await Task.Delay(50);
+                    MainThread.BeginInvokeOnMainThread(async () =>
                     {
-                        await _database.DeleteAlarmAsync(alarm);
                         await LoadAlarmsAsync();
-                        await DisplayAlert("Готово", "Будильник удалён", "OK");
-                    }
-                    break;
+                    });
+                }
             }
 
             AlarmsCollection.SelectedItem = null;
         }
     }
+
     private async void OnSwitchToggled(object sender, ToggledEventArgs e)
     {
         if (sender is Switch switchControl && switchControl.BindingContext is AlarmModel alarm)

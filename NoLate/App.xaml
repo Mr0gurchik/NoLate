@@ -5,9 +5,9 @@
              x:Class="NoLate.App">
     <Application.Resources>
         <ResourceDictionary>
-            <Color x:Key="Primary">#FF8C00</Color>
+            <Color x:Key="Primary">#E67E00</Color>
             <Color x:Key="Secondary">#32CD32</Color>
-            <Color x:Key="Background">#1E1E1E</Color>
+            <Color x:Key="Background">#121212</Color>
             <Color x:Key="Surface">#2D2D30</Color>
             <Color x:Key="OnSurface">#FFFFFF</Color>
             <Color x:Key="OnPrimary">#FFFFFF</Color>

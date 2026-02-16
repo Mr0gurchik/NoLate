@@ -19,6 +19,8 @@ namespace NoLate
                 });
 
             builder.Services.AddSingleton<DatabaseService>();
+            builder.Services.AddTransient<MainPage>();
+            builder.Services.AddTransient<AlarmEditPage>();
 
 #if DEBUG
             builder.Logging.AddDebug();

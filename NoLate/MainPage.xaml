@@ -10,7 +10,7 @@
     <ContentPage.Behaviors>
         <toolkit:StatusBarBehavior 
             StatusBarColor="Transparent" 
-            StatusBarStyle="DarkContent" />
+            StatusBarStyle="LightContent" />
     </ContentPage.Behaviors>
 
     <Grid RowDefinitions="*, Auto" Padding="20" Margin="0,40,0,0">

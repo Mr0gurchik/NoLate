@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="NoLate.AlarmEditPage"
+             Title="Редактор"
+             BackgroundColor="#121212"
+             Shell.NavBarIsVisible="False"
+             Shell.PresentationMode="NotAnimated"
+             Opacity="0"
+             TranslationX="1000">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="25" Padding="25">
+
+            <Label Text="Редактор поездки" FontSize="28" FontAttributes="Bold" TextColor="White"/>
+
+            <!-- Куда -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Куда едем?" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
+                <Border Stroke="{StaticResource Primary}" StrokeThickness="1" BackgroundColor="#1E1E1E" StrokeShape="RoundRectangle 10" Padding="15,5">
+                    <Entry x:Name="MestoEntry" Placeholder="Название места" 
+                           TextColor="White" PlaceholderColor="#666" FontSize="16"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Дата и время -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
+                <!-- Дата -->
+                <VerticalStackLayout Grid.Column="0" Spacing="5">
+                    <Label Text="Выберите дату" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
+                    <Border Stroke="{StaticResource Primary}" StrokeThickness="1" BackgroundColor="#1E1E1E" StrokeShape="RoundRectangle 10" Padding="10,5">
+                        <DatePicker x:Name="MestDatePicker" 
+                                    TextColor="White" 
+                                    Format="dd.MM.yyyy"
+                                    FontSize="16"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Время -->
+                <VerticalStackLayout Grid.Column="1" Spacing="5">
+                    <Label Text="Выберите время (24ч)" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
+                    <Border Stroke="{StaticResource Primary}" StrokeThickness="1" BackgroundColor="#1E1E1E" StrokeShape="RoundRectangle 10" Padding="10,5">
+                        <TimePicker x:Name="MestTimePicker" 
+                                    TextColor="White" 
+                                    Format="HH:mm" 
+                                    FontSize="16"/>
+                    </Border>
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- Дорога -->
+            <VerticalStackLayout Grid.Column="0" Spacing="5">
+                <Label Text="В пути (мин)" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
+                <Border Stroke="{StaticResource Primary}" StrokeThickness="1" BackgroundColor="#1E1E1E" StrokeShape="RoundRectangle 10" Padding="15,5">
+                    <Entry x:Name="TravelTimeEntry" 
+                           Keyboard="Numeric" 
+                           TextColor="White" 
+                           HorizontalTextAlignment="Center" 
+                           FontSize="16"
+                           TextChanged="OnTimeEntryTextChanged"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Сборы -->
+            <VerticalStackLayout Grid.Column="1" Spacing="5">
+                <Label Text="Сборы (мин)" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
+                <Border Stroke="{StaticResource Primary}" StrokeThickness="1" BackgroundColor="#1E1E1E" StrokeShape="RoundRectangle 10" Padding="15,5">
+                    <Entry x:Name="DopTimeEntry" 
+                           Keyboard="Numeric" 
+                           TextColor="White" 
+                           HorizontalTextAlignment="Center" 
+                           FontSize="16"
+                           TextChanged="OnTimeEntryTextChanged"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Транспорт -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Транспорт" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
+                <Border Stroke="{StaticResource Primary}" StrokeThickness="1" BackgroundColor="#1E1E1E" StrokeShape="RoundRectangle 10" Padding="10,0">
+                    <Picker x:Name="TransportPicker" TextColor="White" TitleColor="#666">
+                        <Picker.ItemsSource>
+                            <x:Array Type="{x:Type x:String}">
+                                <x:String>Авто 🚗</x:String>
+                                <x:String>Автобус 🚌</x:String>
+                                <x:String>Пешком 🚶</x:String>
+                            </x:Array>
+                        </Picker.ItemsSource>
+                    </Picker>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Кнопки -->
+            <Button Text="Сохранить" BackgroundColor="{StaticResource Primary}" TextColor="Black" 
+                    FontAttributes="Bold" CornerRadius="10" HeightRequest="50" Margin="0,20,0,0"
+                    Clicked="OnSaveClicked"/>
+
+            <Button Text="Отмена" BackgroundColor="Transparent" TextColor="#888" 
+                    Clicked="OnCancelClicked"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

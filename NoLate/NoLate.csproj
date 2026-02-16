@@ -58,6 +58,16 @@
     <PackageReference Include="Xamarin.AndroidX.Lifecycle.LiveData.Core" Version="2.10.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <MauiXaml Update="AlarmEditPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+  </ItemGroup>
+
    <!-- Великий костыль -->
   <Target Name="RemoveDuplicateViewKt" BeforeTargets="Compile">
     <ItemGroup>
