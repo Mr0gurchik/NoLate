@@ -35,21 +35,20 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:AlarmModel">
-                        <Border Margin="0,5"
-                                Padding="15"
+                        <Border Padding="15"
                                 StrokeShape="RoundRectangle 12"
                                 BackgroundColor="{StaticResource Surface}">
 
                         <!-- Стиль для подсветки -->
                         <Border.Style>
                             <Style TargetType="Border">
-                                <Setter Property="Stroke" Value="#E0E0E0" />
-                                <Setter Property="StrokeThickness" Value="1" />
+                                <Setter Property="StrokeThickness" Value="2" />
+                                <Setter Property="Margin" Value="0,6" />
+                                <Setter Property="Stroke" Value="#40E0E0E0" />
 
                                 <Style.Triggers>
                                     <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
                                         <Setter Property="Stroke" Value="#FF8C00" />
-                                        <Setter Property="StrokeThickness" Value="3" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
