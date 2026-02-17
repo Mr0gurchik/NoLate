@@ -55,7 +55,7 @@ public partial class MainPage : ContentPage
         newAlarm.IsSelected = true;
         _selectedAlarm = newAlarm;
 
-        // Обновления каст меню
+        // Обновления кастом меню
         MenuTitleLabel.Text = _selectedAlarm.Mesto;
 
         // Вывод меню
@@ -71,6 +71,7 @@ public partial class MainPage : ContentPage
         {
             await Shell.Current.GoToAsync($"{nameof(AlarmEditPage)}?Id={_selectedAlarm.Id}");
 
+            await Task.Delay(100);
             // Снимаем выделение
             _selectedAlarm.IsSelected = false;
             _selectedAlarm = null;
