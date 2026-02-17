@@ -6,6 +6,7 @@ namespace NoLate;
 public partial class MainPage : ContentPage
 {
     private readonly DatabaseService _database;
+    private AlarmModel? _selectedAlarm;
 
     public MainPage(DatabaseService database)
     {
@@ -13,7 +14,7 @@ public partial class MainPage : ContentPage
         _database = database;
     }
 
-    // 1. Важно: Обновляем список при появлении экрана
+    // Обновляем список при появлении экрана
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -42,32 +43,73 @@ public partial class MainPage : ContentPage
 
 
     // Клик по будильнику в списке
-    private async void OnAlarmSelected(object sender, SelectionChangedEventArgs e)
+    private async void OnAlarmItemTapped(object sender, TappedEventArgs e)
     {
-        if (e.CurrentSelection.FirstOrDefault() is AlarmModel alarm)
+        var newAlarm = e.Parameter as AlarmModel;
+        if (newAlarm == null) return;
+
+        // Подсветка
+        if (_selectedAlarm != null && _selectedAlarm != newAlarm)
+            _selectedAlarm.IsSelected = false;
+
+        newAlarm.IsSelected = true;
+        _selectedAlarm = newAlarm;
+
+        // Обновления каст меню
+        MenuTitleLabel.Text = _selectedAlarm.Mesto;
+
+        // Вывод меню
+        ActionMenuOverlay.IsVisible = true;
+        await ActionMenuOverlay.FadeTo(1, 150);
+    }
+
+    // Редактирование
+    private async void OnEditMenuClicked(object sender, EventArgs e)
+    {
+        await CloseMenu();
+        if (_selectedAlarm != null)
         {
-            string action = await DisplayActionSheet($"Будильник: {alarm.Mesto}", "Отмена", null, "Редактировать", "Удалить");
+            await Shell.Current.GoToAsync($"{nameof(AlarmEditPage)}?Id={_selectedAlarm.Id}");
 
-            if (action == "Редактировать")
-            {
-                await Shell.Current.GoToAsync($"{nameof(AlarmEditPage)}?Id={alarm.Id}");
-            }
-            else if (action == "Удалить")
-            {
-                bool confirm = await DisplayAlert("Удаление", $"Удалить {alarm.Mesto}?", "Да", "Нет");
-                if (confirm)
-                {
-                    await Task.Run(() => _database.DeleteAlarmAsync(alarm));
-                    await Task.Delay(50);
-                    MainThread.BeginInvokeOnMainThread(async () =>
-                    {
-                        await LoadAlarmsAsync();
-                    });
-                }
-            }
-
-            AlarmsCollection.SelectedItem = null;
+            // Снимаем выделение
+            _selectedAlarm.IsSelected = false;
+            _selectedAlarm = null;
         }
+    }
+
+    // Удаление
+    private async void OnDeleteMenuClicked(object sender, EventArgs e)
+    {
+        await CloseMenu();
+
+        if (_selectedAlarm != null)
+        {
+            bool confirm = await DisplayAlert("Удаление", $"Точно удалить {_selectedAlarm.Mesto}?", "Да", "Нет");
+            if (confirm)
+            {
+                await _database.DeleteAlarmAsync(_selectedAlarm);
+                _selectedAlarm = null;
+                await LoadAlarmsAsync();
+            }
+        }
+    }
+
+    private async void OnOverlayTapped(object sender, EventArgs e)
+    {
+        if (_selectedAlarm != null)
+        {
+            _selectedAlarm.IsSelected = false;
+            _selectedAlarm = null;
+        }
+
+        await CloseMenu();
+    }
+
+    // Метод для закрытия
+    private async Task CloseMenu()
+    {
+        await ActionMenuOverlay.FadeTo(0, 150);
+        ActionMenuOverlay.IsVisible = false;
     }
 
     private async void OnSwitchToggled(object sender, ToggledEventArgs e)

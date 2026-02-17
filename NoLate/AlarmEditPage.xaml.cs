@@ -25,6 +25,8 @@ public partial class AlarmEditPage : ContentPage
         _currentAlarm = new AlarmModel();
         TransportPicker.SelectedIndex = 0;
         MestDatePicker.MinimumDate = DateTime.Today;
+
+        this.Opacity = 0;
     }
 
     //кастомная анимка появления что не была резкой
@@ -34,7 +36,7 @@ public partial class AlarmEditPage : ContentPage
         var screenWidth = DeviceDisplay.MainDisplayInfo.Width / DeviceDisplay.MainDisplayInfo.Density;
         this.TranslationX = screenWidth;
         this.Opacity = 1;
-        await Task.Delay(10);
+        base.OnAppearing();
         await this.TranslateTo(0, 0, 350, Easing.CubicOut);
     }
 

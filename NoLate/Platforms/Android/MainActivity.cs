@@ -16,6 +16,8 @@ namespace NoLate
 
             if (Window != null)
             {
+                Window.ClearFlags(WindowManagerFlags.TranslucentStatus);
+                Window.AddFlags(WindowManagerFlags.DrawsSystemBarBackgrounds);
                 // Сука прозрачный фон
 #pragma warning disable CA1422 // Проверка совместимости платформы
                 Window.SetStatusBarColor(Android.Graphics.Color.Transparent);

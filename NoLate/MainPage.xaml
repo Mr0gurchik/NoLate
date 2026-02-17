@@ -18,8 +18,7 @@
         <!-- Список -->
             <CollectionView x:Name="AlarmsCollection"
                         Grid.Row="0"
-                        SelectionMode="Single"
-                        SelectionChanged="OnAlarmSelected">
+                        SelectionMode="None">
 
                 <!-- Пустой список -->
                 <CollectionView.EmptyView>
@@ -39,11 +38,28 @@
                         <Border Margin="0,5"
                                 Padding="15"
                                 StrokeShape="RoundRectangle 12"
-                                BackgroundColor="{StaticResource Surface}"
-                                Stroke="#E0E0E0" 
-                                StrokeThickness="1">
+                                BackgroundColor="{StaticResource Surface}">
 
-                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                        <!-- Стиль для подсветки -->
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Stroke" Value="#E0E0E0" />
+                                <Setter Property="StrokeThickness" Value="1" />
+
+                                <Style.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                        <Setter Property="Stroke" Value="#FF8C00" />
+                                        <Setter Property="StrokeThickness" Value="3" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnAlarmItemTapped" CommandParameter="{Binding .}"/>
+                        </Border.GestureRecognizers>
+
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
 
                                 <!-- Адрес -->
                                 <Label Grid.Row="0" Grid.Column="0"
@@ -54,7 +70,7 @@
 
                                 <!-- Время прибытия -->
                                 <Label Grid.Row="1" Grid.Column="0"
-                                       Text="{Binding MestTime, StringFormat='Ко времени: {0:dd.MM HH:mm}'}"
+                                       Text="{Binding MestTime, StringFormat='{0:dd.MM    HH:mm}'}"
                                        FontSize="14"
                                        TextColor="{StaticResource Primary}" />
 
@@ -96,7 +112,63 @@
              Margin="40,15,40,20"
              Aspect="AspectFit"
              Clicked="OnAddClicked" />
+        
+        <!-- Кастомное меню что бы оно распологалась по центру экрана ну и впринципе это лучше можно хоть редачить-->
+        <Grid x:Name="ActionMenuOverlay"
+             Grid.Row="0" Grid.RowSpan="2"
+             ZIndex="100"  
+             IsVisible="False"
+             Opacity="0">
 
+            <!-- Так ну закрытие при клацание мимо -->
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnOverlayTapped"/>
+            </Grid.GestureRecognizers>
+
+            <BoxView Color="{StaticResource Background}" Opacity="0.8" />
+
+            <Border Stroke="{StaticResource Primary}"
+                StrokeThickness="1"
+                BackgroundColor="#1E1E1E"
+                StrokeShape="RoundRectangle 20"
+                WidthRequest="300"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                Padding="20">
+
+                <VerticalStackLayout Spacing="15">
+                    <!-- Заголовок -->
+                    <Label x:Name="MenuTitleLabel"
+                       Text="Куда едем?"
+                       TextColor="White"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"/>
+
+                    <BoxView Color="#333" HeightRequest="1" />
+
+                    <!-- Кнопка Редактировать -->
+                    <Button Text="Редактировать ✏️"
+                        BackgroundColor="#333"
+                        TextColor="White"
+                        CornerRadius="10"
+                        Clicked="OnEditMenuClicked"/>
+
+                    <!-- Кнопка Удалить -->
+                    <Button Text="Удалить 🗑️"
+                        BackgroundColor="#3E1010"
+                        TextColor="#FF4444"
+                        CornerRadius="10"
+                        Clicked="OnDeleteMenuClicked"/>
+
+                    <!-- Кнопка Отмена -->
+                    <Button Text="Отмена"
+                        BackgroundColor="Transparent"
+                        TextColor="#888"
+                        Clicked="OnOverlayTapped"/>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+        
     </Grid>
-
 </ContentPage>

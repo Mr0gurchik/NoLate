@@ -5,9 +5,7 @@
              Title="Редактор"
              BackgroundColor="#121212"
              Shell.NavBarIsVisible="False"
-             Shell.PresentationMode="NotAnimated"
-             Opacity="0"
-             TranslationX="1000">
+             Shell.PresentationMode="NotAnimated">
 
     <ScrollView>
         <VerticalStackLayout Spacing="25" Padding="25">
