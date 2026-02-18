@@ -62,7 +62,6 @@ public partial class AlarmEditPage : ContentPage
 
     private async void OnSaveClicked(object sender, EventArgs e)
     {
-        // 1. Валидация названия
         if (string.IsNullOrWhiteSpace(MestoEntry.Text))
         {
             await DisplayAlert("Ой!", "Напишите, куда едем", "OK");

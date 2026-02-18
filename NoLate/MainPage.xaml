@@ -54,6 +54,7 @@
                             </Style>
                         </Border.Style>
 
+                        <!-- Обработка нажатия по будильнику в списке -->
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnAlarmItemTapped" CommandParameter="{Binding .}"/>
                         </Border.GestureRecognizers>
@@ -103,15 +104,18 @@
             </CollectionView>
         
         <!-- Кнопка добавления -->
-        <ImageButton Grid.Row="1"
-             Source="add_button.png"
-             BackgroundColor="Transparent"
-             HeightRequest="80"
-             HorizontalOptions="Fill" 
+        <Button Grid.Row="1"
+             Text="+ Добавить"
+             FontSize="20"
+             FontAttributes="Bold"
+             TextColor="Black"
+             BackgroundColor="{StaticResource Primary}"
+             CornerRadius="25" 
+             HeightRequest="60"
+             HorizontalOptions="Fill"
              Margin="40,15,40,20"
-             Aspect="AspectFit"
              Clicked="OnAddClicked" />
-        
+             
         <!-- Кастомное меню что бы оно распологалась по центру экрана ну и впринципе это лучше можно хоть редачить-->
         <Grid x:Name="ActionMenuOverlay"
              Grid.Row="0" Grid.RowSpan="2"

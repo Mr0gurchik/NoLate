@@ -14,8 +14,14 @@
 
             <!-- Куда -->
             <VerticalStackLayout Spacing="5">
-                <Label Text="Куда едем?" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
-                <Border Stroke="{StaticResource Primary}" StrokeThickness="1" BackgroundColor="#1E1E1E" StrokeShape="RoundRectangle 10" Padding="15,5">
+                <Label Text="Куда едем?"
+                       FontSize="12"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}"/>
+                <Border Stroke="{StaticResource Primary}"
+                        StrokeThickness="1" BackgroundColor="#1E1E1E" 
+                        StrokeShape="RoundRectangle 10"
+                        Padding="15,5">
                     <Entry x:Name="MestoEntry" Placeholder="Название места" 
                            TextColor="White" PlaceholderColor="#666" FontSize="16"/>
                 </Border>
@@ -25,8 +31,15 @@
             <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
                 <!-- Дата -->
                 <VerticalStackLayout Grid.Column="0" Spacing="5">
-                    <Label Text="Выберите дату" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
-                    <Border Stroke="{StaticResource Primary}" StrokeThickness="1" BackgroundColor="#1E1E1E" StrokeShape="RoundRectangle 10" Padding="10,5">
+                    <Label Text="Выберите дату"
+                           FontSize="12"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Primary}"/>
+                    <Border Stroke="{StaticResource Primary}"
+                            StrokeThickness="1"
+                            BackgroundColor="#1E1E1E"
+                            StrokeShape="RoundRectangle 10"
+                            Padding="10,5">
                         <DatePicker x:Name="MestDatePicker" 
                                     TextColor="White" 
                                     Format="dd.MM.yyyy"
@@ -36,8 +49,14 @@
 
                 <!-- Время -->
                 <VerticalStackLayout Grid.Column="1" Spacing="5">
-                    <Label Text="Выберите время (24ч)" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
-                    <Border Stroke="{StaticResource Primary}" StrokeThickness="1" BackgroundColor="#1E1E1E" StrokeShape="RoundRectangle 10" Padding="10,5">
+                    <Label Text="Выберите время (24ч)"
+                           FontSize="12"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Primary}"/>
+                    <Border Stroke="{StaticResource Primary}"
+                            StrokeThickness="1" BackgroundColor="#1E1E1E"
+                            StrokeShape="RoundRectangle 10"
+                            Padding="10,5">
                         <TimePicker x:Name="MestTimePicker" 
                                     TextColor="White" 
                                     Format="HH:mm" 
@@ -48,8 +67,14 @@
 
             <!-- Дорога -->
             <VerticalStackLayout Grid.Column="0" Spacing="5">
-                <Label Text="В пути (мин)" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
-                <Border Stroke="{StaticResource Primary}" StrokeThickness="1" BackgroundColor="#1E1E1E" StrokeShape="RoundRectangle 10" Padding="15,5">
+                <Label Text="В пути (мин)" 
+                       FontSize="12" 
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}"/>
+                <Border Stroke="{StaticResource Primary}"
+                        StrokeThickness="1" BackgroundColor="#1E1E1E"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="15,5">
                     <Entry x:Name="TravelTimeEntry" 
                            Keyboard="Numeric" 
                            TextColor="White" 
@@ -61,8 +86,13 @@
 
             <!-- Сборы -->
             <VerticalStackLayout Grid.Column="1" Spacing="5">
-                <Label Text="Сборы (мин)" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
-                <Border Stroke="{StaticResource Primary}" StrokeThickness="1" BackgroundColor="#1E1E1E" StrokeShape="RoundRectangle 10" Padding="15,5">
+                <Label Text="Сборы (мин)"
+                       FontSize="12" FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}"/>
+                <Border Stroke="{StaticResource Primary}"
+                        StrokeThickness="1" BackgroundColor="#1E1E1E"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="15,5">
                     <Entry x:Name="DopTimeEntry" 
                            Keyboard="Numeric" 
                            TextColor="White" 
@@ -74,8 +104,15 @@
 
             <!-- Транспорт -->
             <VerticalStackLayout Spacing="5">
-                <Label Text="Транспорт" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
-                <Border Stroke="{StaticResource Primary}" StrokeThickness="1" BackgroundColor="#1E1E1E" StrokeShape="RoundRectangle 10" Padding="10,0">
+                <Label Text="Транспорт"
+                       FontSize="12"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}"/>
+                <Border Stroke="{StaticResource Primary}"
+                        StrokeThickness="1"
+                        BackgroundColor="#1E1E1E"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="10,0">
                     <Picker x:Name="TransportPicker" TextColor="White" TitleColor="#666">
                         <Picker.ItemsSource>
                             <x:Array Type="{x:Type x:String}">
@@ -89,11 +126,18 @@
             </VerticalStackLayout>
 
             <!-- Кнопки -->
-            <Button Text="Сохранить" BackgroundColor="{StaticResource Primary}" TextColor="Black" 
-                    FontAttributes="Bold" CornerRadius="10" HeightRequest="50" Margin="0,20,0,0"
+            <Button Text="Сохранить"
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="Black" 
+                    FontAttributes="Bold"
+                    CornerRadius="10"
+                    HeightRequest="50"
+                    Margin="0,20,0,0"
                     Clicked="OnSaveClicked"/>
 
-            <Button Text="Отмена" BackgroundColor="Transparent" TextColor="#888" 
+            <Button Text="Отмена"
+                    BackgroundColor="Transparent"
+                    TextColor="#888" 
                     Clicked="OnCancelClicked"/>
 
         </VerticalStackLayout>
