@@ -13,6 +13,15 @@ namespace NoLate.Models
         // Адрес
         public string? Mesto { get; set; }
 
+        // Координаты назначения для сохранения результатов
+        public double? ToLat { get; set; }
+        public double? ToLon { get; set; }
+
+        // Координаты старта (откуда едем). 
+        // Можно конечно брять просто текуш точки через GPS но для надежности лучше хранить последнее известное местоположение.
+        public double? FromLat { get; set; }
+        public double? FromLon { get; set; }
+
         // В пути
         [Ignore]
         public string TravelTimeText => $"В пути: {TravelTime} мин + {DopTime} мин";

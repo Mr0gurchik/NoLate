@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="NoLate.AlarmEditPage"
              Title="Редактор"
-             BackgroundColor="#121212"
+             BackgroundColor="{StaticResource Background}"
              Shell.NavBarIsVisible="False"
              Shell.PresentationMode="NotAnimated">
 
@@ -12,17 +12,41 @@
 
             <Label Text="Редактор поездки" FontSize="28" FontAttributes="Bold" TextColor="White"/>
 
-            <!-- Куда -->
+            <!-- СЕКЦИЯ МЕСТА (Карта) -->
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Куда направляемся?"
+                       FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
+
+                <!-- Кнопка карты -->
+                <Button Text="📍 Выбрать место на карте"
+                        BackgroundColor="#2A2A2A"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        CornerRadius="12"
+                        HeightRequest="60"
+                        BorderColor="{StaticResource Primary}"
+                        BorderWidth="1"
+                        Clicked="OnOpenMapClicked"/>
+
+                <!-- Отображение выбранного адреса -->
+                <Label x:Name="AddressLabel"
+                       Text="Адрес не выбран"
+                       TextColor="#888"
+                       FontSize="12"
+                       HorizontalTextAlignment="Center"/>
+            </VerticalStackLayout>
+
+            <!-- Название -->
             <VerticalStackLayout Spacing="5">
-                <Label Text="Куда едем?"
+                <Label Text="Название"
                        FontSize="12"
                        FontAttributes="Bold"
                        TextColor="{StaticResource Primary}"/>
                 <Border Stroke="{StaticResource Primary}"
-                        StrokeThickness="1" BackgroundColor="#1E1E1E" 
+                        StrokeThickness="1" BackgroundColor="#1E1E1E"
                         StrokeShape="RoundRectangle 10"
                         Padding="15,5">
-                    <Entry x:Name="MestoEntry" Placeholder="Название места" 
+                    <Entry x:Name="MestoEntry" Placeholder="Например: Работа"
                            TextColor="White" PlaceholderColor="#666" FontSize="16"/>
                 </Border>
             </VerticalStackLayout>
@@ -40,8 +64,8 @@
                             BackgroundColor="#1E1E1E"
                             StrokeShape="RoundRectangle 10"
                             Padding="10,5">
-                        <DatePicker x:Name="MestDatePicker" 
-                                    TextColor="White" 
+                        <DatePicker x:Name="MestDatePicker"
+                                    TextColor="White"
                                     Format="dd.MM.yyyy"
                                     FontSize="16"/>
                     </Border>
@@ -57,32 +81,13 @@
                             StrokeThickness="1" BackgroundColor="#1E1E1E"
                             StrokeShape="RoundRectangle 10"
                             Padding="10,5">
-                        <TimePicker x:Name="MestTimePicker" 
-                                    TextColor="White" 
-                                    Format="HH:mm" 
+                        <TimePicker x:Name="MestTimePicker"
+                                    TextColor="White"
+                                    Format="HH:mm"
                                     FontSize="16"/>
                     </Border>
                 </VerticalStackLayout>
             </Grid>
-
-            <!-- Дорога -->
-            <VerticalStackLayout Grid.Column="0" Spacing="5">
-                <Label Text="В пути (мин)" 
-                       FontSize="12" 
-                       FontAttributes="Bold"
-                       TextColor="{StaticResource Primary}"/>
-                <Border Stroke="{StaticResource Primary}"
-                        StrokeThickness="1" BackgroundColor="#1E1E1E"
-                        StrokeShape="RoundRectangle 10"
-                        Padding="15,5">
-                    <Entry x:Name="TravelTimeEntry" 
-                           Keyboard="Numeric" 
-                           TextColor="White" 
-                           HorizontalTextAlignment="Center" 
-                           FontSize="16"
-                           TextChanged="OnTimeEntryTextChanged"/>
-                </Border>
-            </VerticalStackLayout>
 
             <!-- Сборы -->
             <VerticalStackLayout Grid.Column="1" Spacing="5">
@@ -93,10 +98,10 @@
                         StrokeThickness="1" BackgroundColor="#1E1E1E"
                         StrokeShape="RoundRectangle 10"
                         Padding="15,5">
-                    <Entry x:Name="DopTimeEntry" 
-                           Keyboard="Numeric" 
-                           TextColor="White" 
-                           HorizontalTextAlignment="Center" 
+                    <Entry x:Name="DopTimeEntry"
+                           Keyboard="Numeric"
+                           TextColor="White"
+                           HorizontalTextAlignment="Center"
                            FontSize="16"
                            TextChanged="OnTimeEntryTextChanged"/>
                 </Border>
@@ -128,7 +133,7 @@
             <!-- Кнопки -->
             <Button Text="Сохранить"
                     BackgroundColor="{StaticResource Primary}"
-                    TextColor="Black" 
+                    TextColor="Black"
                     FontAttributes="Bold"
                     CornerRadius="10"
                     HeightRequest="50"
@@ -137,7 +142,7 @@
 
             <Button Text="Отмена"
                     BackgroundColor="Transparent"
-                    TextColor="#888" 
+                    TextColor="#888"
                     Clicked="OnCancelClicked"/>
 
         </VerticalStackLayout>
