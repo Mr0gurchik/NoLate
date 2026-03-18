@@ -128,7 +128,8 @@
         const styleId = '019c7781-7464-763a-805b-e79a9d92c753';
 
         // Параметры карты
-        var map = new maplibregl.Map({
+        var map = new maplibregl.Map(
+        {
             container: 'map',
             style: `https://api.maptiler.com/maps/${styleId}/style.json?key=${apiKey}`,
             center: [37.6173, 55.7558],
@@ -222,7 +223,7 @@
                 });
         }
 
-
+        // Функция поиска адреса
         function searchAddress()
         {
             var query = document.getElementById('searchInput').value;
@@ -300,6 +301,7 @@
             );
         }
 
+        // Функция котороя перемешает позицию карты на цент москвы если позиция пользователя не найдена
         function flyToMoscow()
         {
             map.flyTo(

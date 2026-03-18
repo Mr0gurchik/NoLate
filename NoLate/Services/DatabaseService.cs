@@ -43,4 +43,3 @@ namespace NoLate.Services
             => _db.DeleteAsync(alarm);
     }
 }
-

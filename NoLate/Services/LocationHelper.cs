@@ -16,6 +16,7 @@ public static class LocationHelper
             return false;
         }
 
+        // Показываем объяснение если пользователь паникер
         if (Permissions.ShouldShowRationale<Permissions.LocationWhenInUse>())
         {
             await Shell.Current.DisplayAlert("Нужен GPS", "Чтобы считать пробки от вашего местоположения, нужен доступ к геопозиции.", "ОК");

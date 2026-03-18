@@ -14,7 +14,7 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
     private double _selectedLat;
     private double _selectedLon;
     private string? _selectedAddress;
-    private readonly YandexRouteService _routeService;
+    private readonly OTPRouteService routeService;
     private readonly DatabaseService _database;
     private AlarmModel _currentAlarm;
 
@@ -63,7 +63,7 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
     {
         InitializeComponent();
         _database = database;
-        _routeService = new YandexRouteService();
+        routeService = new OTPRouteService();
         _currentAlarm = new AlarmModel();
         TransportPicker.SelectedIndex = 0;
         MestDatePicker.MinimumDate = DateTime.Today;
@@ -71,7 +71,7 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
         this.Opacity = 0;
     }
 
-    //кастомная анимка появления что не была резкой
+    //Кастомная анимка появления что не была резкой
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -95,7 +95,7 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
                 System.Diagnostics.Debug.WriteLine($"GPS готов {CurrentLat}, {CurrentLon}");
             }
         }
-        catch { /* Тихо игнорим ошибки */ }
+        catch {} // здесь ниче ни ловим при ошибке нас просто перекинет в центр москвы (для нас то что gps тупит это норма уже года 4)
     }
 
     // Загрузка буд при редакт
@@ -109,7 +109,7 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
                 _currentAlarm = alarm;
 
                 // Заполняем поля
-                MestoEntry.Text = alarm.Mesto; // Теперь это просто название
+                MestoEntry.Text = alarm.Mesto;
                 MestDatePicker.Date = alarm.MestTime.Date;
                 MestTimePicker.Time = alarm.MestTime.TimeOfDay;
                 DopTimeEntry.Text = alarm.DopTime.ToString();
@@ -143,6 +143,8 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
             return;
         }
 
+        LoadingOverlay.IsVisible = true;
+
         if (string.IsNullOrWhiteSpace(MestoEntry.Text))
         {
             MestoEntry.Text = !string.IsNullOrEmpty(_selectedAddress) ? _selectedAddress : "Поездка";
@@ -156,13 +158,20 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
             return;
         }
 
-        // Запрос на расчет пути к яндексу
+        // Запрос на расчет пути к OTP
         int travelTime = 0;
         try
         {
-            int? routeTime = await _routeService.GetTravelTimeMinutes(
-            location.Latitude, location.Longitude,
-            _selectedLat, _selectedLon);
+            // Берем выбранный транспорт или по умолчанию "Пешком"
+            string selectedTransport = TransportPicker.SelectedItem?.ToString() ?? "Пешком";
+
+            // Передаем координаты и выбранный транспорт в наш OTP сервис
+            int? routeTime = await routeService.GetTravelTimeMinutes
+            (
+                location.Latitude, location.Longitude,
+                _selectedLat, _selectedLon,
+                selectedTransport
+            );
 
             if (routeTime.HasValue)
             {
@@ -170,14 +179,20 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
             }
             else
             {
+                LoadingOverlay.IsVisible = false;
                 await DisplayAlert("Ошибка маршрута", "Не удалось построить маршрут. Проверьте интернет.", "ОК");
                 return;
             }
         }
         catch (Exception ex)
         {
+            LoadingOverlay.IsVisible = false;
             await DisplayAlert("Ошибка", $"Сбой при расчете: {ex.Message}", "ОК");
             return;
+        }
+        finally
+        {
+            LoadingOverlay.IsVisible = false;
         }
 
         // Сборка даты и времени
@@ -211,7 +226,7 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
         if (timeLeft.TotalMinutes < 0)
         {
             await DisplayAlert("Увы...",
-            $"Вы не успеете приехать к {fullDateTime:HH:mm}!\\n" +
+            $"Вы не успеете приехать к {fullDateTime:HH:mm}!\n" +
             $"Дорога занимает {travelTime} мин, а осталось всего {Math.Max(0, (int)(fullDateTime - DateTime.Now).TotalMinutes)} мин.",
             "Жаль");
             return;
@@ -231,7 +246,7 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
 
             if (!confirm) return;
 
-            // Если "Да" - сокращаем сборы до возможного максимума
+            // Если "Да" сокращаем сборы до возможного максимума
             dopTime = Math.Max(0, availableDopTime);
             // Пересчитываем время будильника
             alarmTime = DateTime.Now;
@@ -242,7 +257,7 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
         _currentAlarm.MestTime = fullDateTime;
         _currentAlarm.TravelTime = travelTime;
         _currentAlarm.DopTime = dopTime;
-        _currentAlarm.Transport = TransportPicker.SelectedItem?.ToString() ?? "Авто";
+        _currentAlarm.Transport = TransportPicker.SelectedItem?.ToString() ?? "Пешком";
         _currentAlarm.IsActive = true;
         _currentAlarm.ToLat = _selectedLat;
         _currentAlarm.ToLon = _selectedLon;
@@ -254,7 +269,14 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
 
         // Сохранение
         await _database.SaveAlarmAsync(_currentAlarm);
-        await DisplayAlert("Маршрут построен", $"Ехать: {travelTime} мин\\nСборы: {dopTime} мин\\nБудильник на: {alarmTime:HH:mm}", "ОК");
+#if ANDROID
+        Android.Util.Log.Info("NoLate", $"SAVE: id={_currentAlarm.Id} alarmTime={_currentAlarm.AlarmTime:O}");
+#endif
+#if ANDROID
+        NoLate.Platforms.Android.AlarmScheduler.Schedule(_currentAlarm.Id, _currentAlarm.AlarmTime);
+#endif
+        LoadingOverlay.IsVisible = false;
+        await DisplayAlert("Маршрут построен", $"Ехать: {travelTime} мин\nСборы: {dopTime} мин\nБудильник на: {alarmTime:HH:mm}", "ОК");
         double screenWidth = this.Width;
         await this.TranslateTo(screenWidth, 0, 300, Easing.CubicIn);
         await Navigation.PopAsync(animated: false);
@@ -268,6 +290,7 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
         await Navigation.PopAsync(animated: false);
     }
 
+    //Метод для запрета ввода хрени всякой
     private void OnTimeEntryTextChanged(object sender, TextChangedEventArgs e)
     {
         if (sender is Entry entry)

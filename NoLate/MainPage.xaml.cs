@@ -7,17 +7,41 @@ public partial class MainPage : ContentPage
 {
     private readonly DatabaseService _database;
     private AlarmModel? _selectedAlarm;
+    private bool _startedOnce;
 
     public MainPage(DatabaseService database)
     {
         InitializeComponent();
         _database = database;
+
+#pragma warning disable CS0618
+        // Ловим сигнал об отключении будильника
+        Microsoft.Maui.Controls.MessagingCenter.Subscribe<object>(this, "UpdateAlarms", async (sender) =>
+        {
+            await LoadAlarmsAsync();
+        });
+#pragma warning restore CS0618
     }
 
     // Обновляем список при появлении экрана
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+
+        //  Сначала спросить разрешение на уведомления (ток для Android 13+)
+        await RequestNotificationPermission();
+
+        // Запросить права на будильники (Android 12+)
+        await RequestExactAlarmPermission();
+
+        // Потом стартануть foreground service (1 раз)
+        if (!_startedOnce)
+        {
+            _startedOnce = true;
+            StartBackgroundService();
+        }
+
+        // 3) Затем загрузить список
         await LoadAlarmsAsync();
     }
 
@@ -27,6 +51,22 @@ public partial class MainPage : ContentPage
         try
         {
             var alarms = await _database.GetAlarmsAsync();
+            bool isUpdated = false;
+
+            foreach (var alarm in alarms)
+            {
+                // Если будильник включен, но его время прошло то вырубаем свич
+                if (alarm.IsActive && alarm.AlarmTime < DateTime.Now)
+                {
+                    alarm.IsActive = false;
+                    await _database.SaveAlarmAsync(alarm);
+                    isUpdated = true;
+                }
+            }
+
+            // Если были авто-отключения, перезапрашиваем актуальный список
+            if (isUpdated) alarms = await _database.GetAlarmsAsync();
+
             AlarmsCollection.ItemsSource = alarms;
         }
         catch (Exception ex)
@@ -88,12 +128,17 @@ public partial class MainPage : ContentPage
             bool confirm = await DisplayAlert("Удаление", $"Точно удалить {_selectedAlarm.Mesto}?", "Да", "Нет");
             if (confirm)
             {
+#if ANDROID
+                NoLate.Platforms.Android.AlarmScheduler.Cancel(_selectedAlarm.Id);
+#endif
+
                 await _database.DeleteAlarmAsync(_selectedAlarm);
                 _selectedAlarm = null;
                 await LoadAlarmsAsync();
             }
         }
     }
+
 
     private async void OnOverlayTapped(object sender, EventArgs e)
     {
@@ -113,17 +158,116 @@ public partial class MainPage : ContentPage
         ActionMenuOverlay.IsVisible = false;
     }
 
+    // Свич будильника
     private async void OnSwitchToggled(object sender, ToggledEventArgs e)
     {
         if (sender is Switch switchControl && switchControl.BindingContext is AlarmModel alarm)
         {
+            // Если пытаемся включить будильник
+            if (e.Value)
+            {
+                // Проверяем не прошло ли уже время этого будильника
+                if (alarm.AlarmTime <= DateTime.Now)
+                {
+                    // Переводим время срабатывания на 1 день вперед
+                    alarm.AlarmTime = alarm.AlarmTime.AddDays(1);
+                    alarm.MestTime = alarm.MestTime.AddDays(1);
+
+                    await DisplayAlert("Инфо", "Выбранное время уже прошло, перенесли на завтра.", "ОК");
+                }
+            }
+
+            // Синхронизируем состояние (на случай если биндинг отработал не до конца
             alarm.IsActive = e.Value;
+
+            // Сохраняем изменения в базу
             await _database.SaveAlarmAsync(alarm);
+
+#if ANDROID
+            if (!alarm.IsActive)
+            {
+                NoLate.Platforms.Android.AlarmScheduler.Cancel(alarm.Id);
+                global::Android.Util.Log.Error("Alarm", $"Будильник офнут");
+            }
+            else
+            {
+                NoLate.Platforms.Android.AlarmScheduler.Schedule(alarm.Id, alarm.AlarmTime);
+                global::Android.Util.Log.Error("Alarm", $"Будильник включен");
+            }
+#endif
+            alarm.OnPropertyChanged(nameof(alarm.AlarmTime));
+            alarm.OnPropertyChanged(nameof(alarm.MestTime));
+            alarm.OnPropertyChanged(nameof(alarm.IsActive));
         }
     }
 
-    private async void OnCounterClicked(object sender, EventArgs e)
+    // Старт фонового сервиса
+    private void StartBackgroundService()
     {
-        await DisplayAlert("Кнопка", "OnCounterClicked сработал", "OK");
+#if ANDROID
+        var context = Android.App.Application.Context;
+        var intent = new Android.Content.Intent(context, typeof(NoLate.Platforms.Android.TrafficService));
+
+        // Для новых версий Android обязательно использовать StartForegroundService
+        if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+        {
+#pragma warning disable CA1416 // Проверка совместимости платформы
+            context.StartForegroundService(intent);
+#pragma warning restore CA1416 // Проверка совместимости платформы
+        }
+        else
+        {
+            context.StartService(intent);
+        }
+#endif
     }
+
+    //Метод запроса разрешения на уведомления
+    private async Task RequestNotificationPermission()
+    {
+        if (DeviceInfo.Version.Major >= 13)
+        {
+            var status = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
+            if (status != PermissionStatus.Granted)
+            {
+                await Permissions.RequestAsync<Permissions.PostNotifications>();
+            }
+        }
+    }
+
+    //Метод запроса разрешения на будильники
+    private async Task RequestExactAlarmPermission()
+    {
+#if ANDROID
+        // Проверяем, что это Android 12 (API 31) или выше
+        if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
+        {
+#pragma warning disable CA1416
+            var alarmManager = (Android.App.AlarmManager?)Android.App.Application.Context.GetSystemService(Android.Content.Context.AlarmService);
+
+            // Если разрешение на точные будильники еще не выдано
+            if (alarmManager != null && !alarmManager.CanScheduleExactAlarms())
+            {
+                bool answer = await DisplayAlert
+                (
+                    "Требуется разрешение",
+                    "Для точного срабатывания будильника приложению нужно специальное разрешение. Пожалуйста, включите его на следующем экране.",
+                    "Перейти в настройки",
+                    "Отмена"
+                );
+
+                if (answer)
+                {
+                    // Открываем специальный системный экран настроек для нашего приложения
+                    var intent = new Android.Content.Intent(Android.Provider.Settings.ActionRequestScheduleExactAlarm);
+                    intent.SetData(Android.Net.Uri.Parse("package:" + Android.App.Application.Context.PackageName));
+                    intent.AddFlags(Android.Content.ActivityFlags.NewTask);
+                    Android.App.Application.Context.StartActivity(intent);
+                }
+            }
+#pragma warning restore CA1416
+        }
+#endif
+    }
+
 }

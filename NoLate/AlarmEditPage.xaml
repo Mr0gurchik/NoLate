@@ -6,13 +6,14 @@
              BackgroundColor="{StaticResource Background}"
              Shell.NavBarIsVisible="False"
              Shell.PresentationMode="NotAnimated">
-
+    
+    <Grid>
     <ScrollView>
         <VerticalStackLayout Spacing="25" Padding="25">
 
             <Label Text="Редактор поездки" FontSize="28" FontAttributes="Bold" TextColor="White"/>
 
-            <!-- СЕКЦИЯ МЕСТА (Карта) -->
+            <!-- Карта -->
             <VerticalStackLayout Spacing="10">
                 <Label Text="Куда направляемся?"
                        FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
@@ -121,10 +122,10 @@
                     <Picker x:Name="TransportPicker" TextColor="White" TitleColor="#666">
                         <Picker.ItemsSource>
                             <x:Array Type="{x:Type x:String}">
-                                <x:String>Авто 🚗</x:String>
-                                <x:String>Автобус 🚌</x:String>
                                 <x:String>Пешком 🚶</x:String>
-                            </x:Array>
+                                <x:String>Общественный транспорт 🚇</x:String>
+                                <x:String>Авто 🚗</x:String>
+                                </x:Array>
                         </Picker.ItemsSource>
                     </Picker>
                 </Border>
@@ -147,4 +148,16 @@
 
         </VerticalStackLayout>
     </ScrollView>
+        <Grid x:Name="LoadingOverlay" 
+          IsVisible="False" 
+          BackgroundColor="#99000000" 
+          InputTransparent="False" 
+          ZIndex="10">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="15">
+                <ActivityIndicator IsRunning="True" Color="{StaticResource Primary}" WidthRequest="60" HeightRequest="60" />
+                <Label Text="Строим маршрут..." TextColor="White" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Grid>
+
+    </Grid>
 </ContentPage>
