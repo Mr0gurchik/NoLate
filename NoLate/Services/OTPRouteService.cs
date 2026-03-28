@@ -132,18 +132,31 @@ public class OTPRouteService
                 return null;
 
             ItineraryData? best;
-            if (transportType.Contains("Общественный"))
+            bool isTransit = false;
+
+            if (transportType != null && transportType.Contains("Общественный"))
             {
-                // Берём первый маршрут где есть хотя бы один транзитный отрезок (автобус/метро/электричка)
+                // Берём первый маршрут где есть хотя бы один общественный транпорт
                 best = itineraries.FirstOrDefault(i => i.Legs?.Any(l => l.TransitLeg) == true)
                        ?? itineraries.First();
+                isTransit = true;
             }
             else
             {
                 best = itineraries.First();
             }
 
-            return (int)Math.Ceiling(best.Duration / 60.0);
+            // Переводим секунды в минуты с округлением вверх
+            int baseTimeMins = (int)Math.Ceiling(best.Duration / 60.0);
+
+            // Процентный буфер 20% от времени поездки для компенсации расхождения реальности с расписанием автобусов и электричек
+            if (isTransit)
+            {
+                int buffer = (int)Math.Ceiling(baseTimeMins * 0.20);
+                return baseTimeMins + buffer;
+            }
+
+            return baseTimeMins;
         }
         catch (Exception ex)
         {
