@@ -133,13 +133,41 @@ public class TrafficService : Service
             notificationManager?.Notify(id + 1000, builder.Build());
 #pragma warning restore CS8604, CS8602
 
-            // Удаляем будильник из бд
+            // Удаляем будильник из бд или переносим
             Task.Run(async () =>
             {
                 if (_database != null)
                 {
                     var alarm = await _database.GetAlarmAsync(id);
-                    if (alarm != null) await _database.DeleteAlarmAsync(alarm);
+                    if (alarm != null)
+                    {
+                        if (!string.IsNullOrEmpty(alarm.RepeatingDays))
+                        {
+                            // Парсим дни из базы
+                            var allowedDays = alarm.RepeatingDays.Split(',').Select(int.Parse).ToList();
+
+                            // Ищем через сколько дней будет следующее срабатывание
+                            int daysToAdd = 1;
+                            while (!allowedDays.Contains((int)alarm.MestTime.AddDays(daysToAdd).DayOfWeek))
+                            {
+                                daysToAdd++;
+                            }
+
+                            // Сдвигаем прибытие и сам будильник на найденное количество дней
+                            alarm.MestTime = alarm.MestTime.AddDays(daysToAdd);
+                            alarm.AlarmTime = alarm.AlarmTime.AddDays(daysToAdd);
+
+                            await _database.SaveAlarmAsync(alarm);
+
+                            // Переназначаем таймер
+                            SetSystemAlarm(alarm.Id, alarm.AlarmTime);
+                        }
+                        // Иначе будильнику хана
+                        else
+                        {
+                            await _database.DeleteAlarmAsync(alarm);
+                        }
+                    }
                 }
             });
         }

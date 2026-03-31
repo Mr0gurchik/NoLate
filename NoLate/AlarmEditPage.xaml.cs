@@ -9,6 +9,7 @@ namespace NoLate;
 [QueryProperty(nameof(AlarmId), "Id")] // Принимаем ID при навигации
 public partial class AlarmEditPage : ContentPage, IQueryAttributable
 {
+    private HashSet<int> _selectedDays = new HashSet<int>();
     public string? CurrentLat { get; set; }
     public string? CurrentLon { get; set; }
     private double _selectedLat;
@@ -24,6 +25,50 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
         set
         {
             LoadAlarm(value);
+        }
+    }
+
+    // Метод для обработки дней срабатывания
+    private void OnDayToggled(object sender, EventArgs e)
+    {
+        if (sender is Button btn && int.TryParse(btn.CommandParameter.ToString(), out int day))
+        {
+            if (_selectedDays.Contains(day))
+            {
+                _selectedDays.Remove(day);
+                btn.BackgroundColor = Color.FromArgb("#2A2A2A");
+                btn.TextColor = Color.FromArgb("#888888");
+            }
+            else
+            {
+                _selectedDays.Add(day);
+                btn.BackgroundColor = Color.FromArgb("#FF9800");
+                btn.TextColor = Colors.Black;
+            }
+
+            RepeatHintLabel.Text = _selectedDays.Count > 0 ? "Будильник будет повторяться" : "Одноразовый будильник";
+        }
+    }
+
+    // Метод для загрузки существующих дней
+    private void UpdateButtonState(int day, bool isSelected)
+    {
+        Button? btn = day switch
+        {
+            1 => BtnDay1,
+            2 => BtnDay2,
+            3 => BtnDay3,
+            4 => BtnDay4,
+            5 => BtnDay5,
+            6 => BtnDay6,
+            0 => BtnDay0,
+            _ => null
+        };
+
+        if (btn != null)
+        {
+            btn.BackgroundColor = isSelected ? Color.FromArgb("#FF9800") : Color.FromArgb("#2A2A2A");
+            btn.TextColor = isSelected ? Colors.Black : Color.FromArgb("#888888");
         }
     }
 
@@ -119,7 +164,17 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
                 _selectedLat = alarm.ToLat ?? 0;
                 _selectedLon = alarm.ToLon ?? 0;
                 // Восстанавливаем адрес (если он не сохранен отдельно, пишем заглушку или берем название)
-                _selectedAddress = alarm.Mesto;
+                _selectedDays.Clear();
+                if (!string.IsNullOrEmpty(alarm.RepeatingDays))
+                {
+                    var days = alarm.RepeatingDays.Split(',').Select(int.Parse);
+                    foreach (var day in days)
+                    {
+                        _selectedDays.Add(day);
+                        UpdateButtonState(day, true);
+                    }
+                    RepeatHintLabel.Text = "Будильник будет повторяться";
+                }
                 // Обновляем метку адреса
                 AddressLabel.Text = _selectedLat != 0
                 ? "Координаты сохранены"
@@ -196,20 +251,38 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
         }
 
         // Сборка даты и времени
-        DateTime selectedDate = MestDatePicker.Date;
         TimeSpan selectedTime = MestTimePicker.Time;
+        DateTime fullDateTime;
 
-        // Получаем полное время прибытия
-        DateTime fullDateTime = selectedDate.Date + selectedTime;
-
-        // Проверка на чюдика:
-        // Если выбранное время было, то переносим на "завтра"
-        if (fullDateTime <= DateTime.Now)
+        if (_selectedDays.Count > 0)
         {
-            // Добавляем 1 день к сегоднешней дате, сохраняя выбранное время
-            fullDateTime = DateTime.Today.AddDays(1) + selectedTime;
+            // Сохраняем строку "1,2,3" в модель
+            _currentAlarm.RepeatingDays = string.Join(",", _selectedDays.OrderBy(d => d));
 
-            await DisplayAlert("Инфо", "Выбранное время уже прошло, перенесли на завтра.", "ОК");
+            // Начинаем поиск с сегодняшнего дня
+            DateTime startSearch = DateTime.Today.Add(selectedTime);
+            if (startSearch <= DateTime.Now)
+                startSearch = startSearch.AddDays(1);
+
+            // Крутим дни вперед, пока не попадем на день, который выбрал пользователь
+            while (!_selectedDays.Contains((int)startSearch.DayOfWeek))
+            {
+                startSearch = startSearch.AddDays(1);
+            }
+            fullDateTime = startSearch;
+        }
+        else
+        {
+            // Если ничего не выбрано то как раньше однаразовый с проверкай на шизу 
+            _currentAlarm.RepeatingDays = null;
+            DateTime selectedDate = MestDatePicker.Date;
+            fullDateTime = selectedDate.Date + selectedTime;
+
+            if (fullDateTime <= DateTime.Now.AddMinutes(1))
+            {
+                fullDateTime = DateTime.Today.AddDays(1) + selectedTime;
+                await DisplayAlert("Инфо", "Выбранное время слишком близко или уже прошло, перенесли на завтра.", "ОК");
+            }
         }
 
         // Парсинг остальных полей

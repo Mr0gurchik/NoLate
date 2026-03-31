@@ -108,7 +108,112 @@
                 </Border>
             </VerticalStackLayout>
 
-            <!-- Транспорт -->
+            <!-- Дни срабатывания -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Дни срабатывания"
+                    FontSize="12"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource Primary}"/>
+
+                <HorizontalStackLayout Spacing="8"
+                    HorizontalOptions="Center"
+                    Margin="0,5,0,0">
+
+                    <Button x:Name="BtnDay1"
+                        Text="ПН"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        CornerRadius="20"
+                        Padding="0"
+                        BackgroundColor="#2A2A2A"
+                        TextColor="#888"
+                        FontAttributes="Bold"
+                        CommandParameter="1"
+                        Clicked="OnDayToggled"/>
+
+                    <Button x:Name="BtnDay2"
+                        Text="ВТ"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        CornerRadius="20"
+                        Padding="0"
+                        BackgroundColor="#2A2A2A"
+                        TextColor="#888"
+                        FontAttributes="Bold"
+                        CommandParameter="2"
+                        Clicked="OnDayToggled"/>
+
+                    <Button x:Name="BtnDay3"
+                        Text="СР"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        CornerRadius="20"
+                        Padding="0"
+                        BackgroundColor="#2A2A2A"
+                        TextColor="#888"
+                        FontAttributes="Bold"
+                        CommandParameter="3"
+                        Clicked="OnDayToggled"/>
+
+                    <Button x:Name="BtnDay4"
+                        Text="ЧТ"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        CornerRadius="20"
+                        Padding="0"
+                        BackgroundColor="#2A2A2A"
+                        TextColor="#888"
+                        FontAttributes="Bold"
+                        CommandParameter="4"
+                        Clicked="OnDayToggled"/>
+
+                    <Button x:Name="BtnDay5"
+                        Text="ПТ"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        CornerRadius="20"
+                        Padding="0"
+                        BackgroundColor="#2A2A2A"
+                        TextColor="#888"
+                        FontAttributes="Bold"
+                        CommandParameter="5"
+                        Clicked="OnDayToggled"/>
+
+                    <Button x:Name="BtnDay6"
+                        Text="СБ"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        CornerRadius="20"
+                        Padding="0"
+                        BackgroundColor="#2A2A2A"
+                        TextColor="#888"
+                        FontAttributes="Bold"
+                        CommandParameter="6"
+                        Clicked="OnDayToggled"/>
+
+                    <Button x:Name="BtnDay0"
+                        Text="ВС"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        CornerRadius="20"
+                        Padding="0"
+                        BackgroundColor="#2A2A2A"
+                        TextColor="#888"
+                        FontAttributes="Bold"
+                        CommandParameter="0"
+                        Clicked="OnDayToggled"/>
+
+                </HorizontalStackLayout>
+
+                <Label x:Name="RepeatHintLabel"
+                    Text="Одноразовый будильник"
+                    TextColor="#888"
+                    FontSize="11"
+                    HorizontalOptions="Center"
+                    Margin="0,5,0,0"/>
+            </VerticalStackLayout>
+
+                <!-- Транспорт -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Транспорт"
                        FontSize="12"

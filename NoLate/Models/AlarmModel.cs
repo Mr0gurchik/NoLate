@@ -41,6 +41,9 @@ namespace NoLate.Models
         // Тип транспорта (НАдеюсь сделаю)
         public string? Transport { get; set; }
 
+        // Однаразка или нет
+        public string? RepeatingDays { get; set; }
+
         // Актив
         public bool IsActive { get; set; } = true;
 

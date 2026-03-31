@@ -18,6 +18,7 @@ public partial class MainPage : ContentPage
         // Ловим сигнал об отключении будильника
         Microsoft.Maui.Controls.MessagingCenter.Subscribe<object>(this, "UpdateAlarms", async (sender) =>
         {
+            await Task.Delay(1000);
             await LoadAlarmsAsync();
         });
 #pragma warning restore CS0618
