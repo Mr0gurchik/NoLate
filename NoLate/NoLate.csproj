@@ -10,7 +10,7 @@
     <Nullable>enable</Nullable>
 
     <ApplicationTitle>NoLate</ApplicationTitle>
-    <ApplicationId>com.companyname.nolate</ApplicationId>
+    <ApplicationId>com.companyname.nolateapp</ApplicationId>
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
 

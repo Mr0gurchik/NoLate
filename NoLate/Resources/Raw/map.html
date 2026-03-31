@@ -36,14 +36,14 @@
             right: 70px;
             z-index: 1000;
             display: flex;
+            flex-direction: column;
             gap: 8px;
         }
 
         /* Поле поиска */
-        input 
-        {
+        input {
             flex: 1;
-            padding: 12px 15px;
+            padding: 8px 15px;
             border-radius: 12px;
             border: 1px solid #444;
             background: rgba(30, 30, 30, 0.95);
@@ -54,10 +54,9 @@
         }
 
         /* Кнопка-эконка поиска */
-        .btn-icon 
-        {
+        .btn-icon {
             width: 48px;
-            height: 48px;
+            height: 38px;
             border-radius: 12px;
             border: 1px solid #444;
             background: #252525;
@@ -111,8 +110,16 @@
 </head>
 <body>
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Поиск места..." onkeydown="if(event.key === 'Enter') searchAddress()">
-        <button class="btn-icon" onclick="searchAddress()">🔍</button>
+        <!-- Поиск Откуда -->
+        <div style="display: flex; gap: 8px;">
+            <input type="text" id="searchInputFrom" placeholder="Откуда" onkeydown="if(event.key === 'Enter') { searchAddresses(); this.blur(); }">
+            <button class="btn-icon" onclick="searchAddresses()">🔍</button>
+        </div>
+        <!-- Поиск Куда -->
+        <div style="display: flex; gap: 8px;">
+            <input type="text" id="searchInputTo" placeholder="Куда" onkeydown="if(event.key === 'Enter') { searchAddresses(); this.blur(); }">
+            <div style="width: 48px; flex-shrink: 0;"></div>
+        </div>
     </div>
 
     <!-- Кнопка GPS для определения текущего местоположения -->
@@ -138,13 +145,38 @@
         });
 
 
-        var currentMarker = null;
-        var currentAddressShort = "Адрес не определен";
-        var currentAddressFull = "";
+        var markerFrom = null;
+        var markerTo = null;
+        var coordsFrom = null;
+        var coordsTo = null;
+        var addressFrom = "Моя позиция";
+        var addressTo = "Адрес не определен";
 
         const urlParams = new URLSearchParams(window.location.search);
         const startLat = urlParams.get('lat');
         const startLon = urlParams.get('lon');
+
+        function fetchAddress(lng, lat, callback)
+        {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ru&addressdetails=1`)
+                .then(res => res.json())
+                .then(data =>
+                {
+                    const addr = data.address || {};
+                    let parts = [];
+                    if (addr.road) parts.push(addr.road);
+                    else if (addr.pedestrian) parts.push(addr.pedestrian);
+                    else if (addr.park) parts.push(addr.park);
+                    if (addr.house_number) parts.push(addr.house_number);
+                    if (addr.city) parts.push(addr.city);
+                    else if (addr.town) parts.push(addr.town);
+                    else if (addr.village) parts.push(addr.village);
+                    else if (addr.city_district) parts.push(addr.city_district);
+
+                    let result = parts.length > 0 ? parts.join(', ') : (data.display_name ? data.display_name.split(',')[0] : "Точка на карте");
+                    callback(result);
+                }) .catch(() => callback(`Координаты: ${lat.toFixed(4)}, ${lng.toFixed(4)}`));
+        }
 
         // Функция при старте
         map.on('load', function ()
@@ -162,71 +194,61 @@
             handleLocation(e.lngLat.lng, e.lngLat.lat);
         });
 
-        // Функция для выстовления маркера
-        function handleLocation(lng, lat)
+        // Функция для установки точки Откуда
+        function setFromLocation(lng, lat, fromSearchText = null)
         {
-            // Ставим маркер
-            if (currentMarker) currentMarker.setLngLat([lng, lat]);
-            else currentMarker = new maplibregl.Marker({ color: "#FF8C00" }).setLngLat([lng, lat]).addTo(map);
+            coordsFrom = { lng, lat };
+            if (markerFrom) markerFrom.setLngLat([lng, lat]);
+            else markerFrom = new maplibregl.Marker({ color: "#301212" }).setLngLat([lng, lat]).addTo(map);
+
+            if (fromSearchText)
+            {
+                addressFrom = fromSearchText;
+            }
+            else
+            {
+                document.getElementById('searchInputFrom').value = "Определение адреса...";
+                fetchAddress(lng, lat, (addr) =>
+                {
+                    addressFrom = addr;
+                    document.getElementById('searchInputFrom').value = addr;
+                });
+            }
+        }
+
+        // Установка точки Куда
+        function handleLocation(lng, lat, fromSearchText = null)
+        {
+            coordsTo = { lng, lat };
+            if (markerTo) markerTo.setLngLat([lng, lat]);
+            else markerTo = new maplibregl.Marker({ color: "#FF8C00" }).setLngLat([lng, lat]).addTo(map);
 
             var btn = document.getElementById('btnSelect');
             btn.style.display = 'block';
-            btn.innerText = "Загрузка...";
 
-            // Запрашиваем адрес с разбивкой
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ru&addressdetails=1`)
-                .then(res => res.json())
-                .then(data =>
+            if (fromSearchText)
+            {
+                addressTo = fromSearchText;
+                btn.innerText = addressTo;
+            }
+            else
+            {
+                btn.innerText = "Загрузка...";
+                document.getElementById('searchInputTo').value = "Определение адреса...";
+                fetchAddress(lng, lat, (addr) =>
                 {
-                    const addr = data.address || {};
-
-                    // Собираем красивую строку: Улица -> Дом -> Город
-                    let parts = [];
-
-                    // Улица / Проспект / Площадь
-                    if (addr.road) parts.push(addr.road);
-                    else if (addr.pedestrian) parts.push(addr.pedestrian);
-                    else if (addr.park) parts.push(addr.park);
-
-                    // Номер дома
-                    if (addr.house_number) parts.push(addr.house_number);
-
-                    // Город / Деревня / Район
-                    if (addr.city) parts.push(addr.city);
-                    else if (addr.town) parts.push(addr.town);
-                    else if (addr.village) parts.push(addr.village);
-                    else if (addr.city_district) parts.push(addr.city_district);
-
-                    // Если вообще ничего нет, берем display_name но коротко
-                    if (parts.length === 0)
-                    {
-                        currentAddressShort = data.display_name.split(',')[0];
-                        currentAddressFull = currentAddressShort;
-                    }
-                    else
-                    {
-                        currentAddressShort = parts.join(', ');
-                        currentAddressFull = parts.join(', ');
-                    }
-
-                    btn.innerText = currentAddressShort;
-                })
-
-                .catch(() =>
-                {
-                    currentAddressShort = "Точка на карте";
-                    currentAddressFull = `Координаты: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-                    btn.innerText = "Выбрать точку";
+                    addressTo = addr;
+                    document.getElementById('searchInputTo').value = addr;
+                    btn.innerText = addr;
                 });
+            }
         }
 
         // Функция поиска адреса
-        function searchAddress()
+        function geocodeAddress(query)
         {
-            var query = document.getElementById('searchInput').value;
-            if (!query) return;
-
-            query = query
+            if (!query) return Promise.resolve(null);
+            var cleanQuery = query
                 .replace(/[,.\s]*(д\.?|дом)\s+(\d+)/gi, ' $2')
                 .replace(/[,.\s]*д-?с\s+([^\s,]+)/gi, ' $1')
                 .replace(/[,.\s]*стр\.?\s+(\d+)/gi, ' стр. $1')
@@ -235,38 +257,66 @@
                 .replace(/\s+/g, ' ')
                 .trim();
 
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&accept-language=ru&limit=3&addressdetails=1`)
+            return fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanQuery)}&accept-language=ru&limit=3&addressdetails=1`)
                 .then(res => res.json())
                 .then(data =>
                 {
-
-                    // Вылавливание ошибки и поставка маркера
                     if (data && data.length > 0)
                     {
-                        var lat = parseFloat(data[0].lat);
-                        var lon = parseFloat(data[0].lon);
-                        map.flyTo({ center: [lon, lat], zoom: 17 });
-                        handleLocation(lon, lat);  // Устанавливаем маркер на найденное место
+                        return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
                     }
-                    else
-                    {
-                        alert("Не найдено: " + query);
-                    }
+                    return null;
                 })
                 .catch(err =>
                 {
-                    console.error("Ошибка поиска:", err);
-                    alert("Ошибка сети");
+                    console.error("Ошибка геокодинга:", err);
+                    return null;
                 });
+        }
+
+        // Главная функция поиска места
+        async function searchAddresses() {
+            var inputFrom = document.getElementById('searchInputFrom').value;
+            var inputTo = document.getElementById('searchInputTo').value;
+            var foundTo = false;
+
+            // Ищем Откуда
+            if (inputFrom && inputFrom !== addressFrom) {
+                const coordsFromLoc = await geocodeAddress(inputFrom);
+                if (coordsFromLoc) {
+                    setFromLocation(coordsFromLoc.lon, coordsFromLoc.lat, inputFrom);
+                }
+            }
+
+            // Ищем Куда
+            if (inputTo && inputTo !== addressTo) {
+                const coordsToLoc = await geocodeAddress(inputTo);
+                if (coordsToLoc) {
+                    handleLocation(coordsToLoc.lon, coordsToLoc.lat, inputTo);
+                    map.flyTo({ center: [coordsToLoc.lon, coordsToLoc.lat], zoom: 17 });
+                    foundTo = true;
+                } else {
+                    alert("Не найдено: " + inputTo);
+                }
+            }
+
+            if (!foundTo && inputFrom && inputFrom !== addressFrom) {
+                if (coordsFrom) {
+                    map.flyTo({ center: [coordsFrom.lng, coordsFrom.lat], zoom: 17 });
+                }
+            }
         }
 
         // отправка в C#
         function sendLocation()
         {
-            if (!currentMarker) return;
-            const lngLat = currentMarker.getLngLat();
-            const encodedAddr = encodeURIComponent(currentAddressFull);
-            window.location.href = `invoke://data?lat=${lngLat.lat}&lon=${lngLat.lng}&addr=${encodedAddr}`;
+            if (!coordsTo) return;
+            let url = `invoke://data?toLat=${coordsTo.lat}&toLon=${coordsTo.lng}&toAddr=${encodeURIComponent(addressTo)}`;
+            if (coordsFrom)
+            {
+                url += `&fromLat=${coordsFrom.lat}&fromLon=${coordsFrom.lng}&fromAddr=${encodeURIComponent(addressFrom)}`;
+            }
+            window.location.href = url;
         }
 
         // функция для определения положения пользователя
@@ -284,7 +334,7 @@
                     const lng = position.coords.longitude;
                     const lat = position.coords.latitude;
                     map.flyTo({ center: [lng, lat], zoom: 16 });
-                    handleLocation(lng, lat);
+                    setFromLocation(lng, lat);
                 },
                 error =>
                 {

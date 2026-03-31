@@ -92,28 +92,36 @@ public partial class MapPage : ContentPage, IQueryAttributable
 
             try
             {
-                var uri = new Uri(e.Url);  // Парсим "invoke://data?..."
-                var query = HttpUtility.ParseQueryString(uri.Query);  // Разбираем параметры
+                var uri = new Uri(e.Url);
+                var query = HttpUtility.ParseQueryString(uri.Query);
 
-                string? latStr = query["lat"];
-                string? lonStr = query["lon"];
+                string? toLatStr = query["toLat"];
+                string? toLonStr = query["toLon"];
+                string toAddr = query["toAddr"] ?? "Адрес не определен";
 
-                // Декодирование адреса
-                string addr = query["addr"] ?? "Адрес не определен";
+                string? fromLatStr = query["fromLat"];
+                string? fromLonStr = query["fromLon"];
+                string fromAddr = query["fromAddr"] ?? "Текущая позиция";
 
-                // Проверяем координаты (защита от Not a Number)
-                if (double.TryParse(latStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double lat) &&
-                    double.TryParse(lonStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double lon))
+                if (double.TryParse(toLatStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double toLat) &&
+                    double.TryParse(toLonStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double toLon))
                 {
-                    // Отправляем данные в AlarmEditPage
                     var navigationParams = new Dictionary<string, object>
                     {
-                        { "SelectedLat", lat },
-                        { "SelectedLon", lon },
-                        { "SelectedAddress", addr }
+                        { "SelectedLat", toLat },
+                        { "SelectedLon", toLon },
+                        { "SelectedAddress", toAddr }
                     };
 
-                    await Shell.Current.GoToAsync("..", navigationParams);  // Возврат с данными
+                    if (double.TryParse(fromLatStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double fromLat) &&
+                        double.TryParse(fromLonStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double fromLon))
+                    {
+                        navigationParams.Add("FromLat", fromLat);
+                        navigationParams.Add("FromLon", fromLon);
+                        navigationParams.Add("FromAddress", fromAddr);
+                    }
+
+                    await Shell.Current.GoToAsync("..", navigationParams);
                 }
             }
             catch (Exception ex)

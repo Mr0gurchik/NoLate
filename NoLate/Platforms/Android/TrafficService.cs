@@ -119,7 +119,7 @@ public class TrafficService : Service
 
 #pragma warning disable CS8604, CS8602
             var builder = new NotificationCompat.Builder(this, channelId)
-                .SetSmallIcon(global::Android.Resource.Drawable.IcDialogInfo)
+                .SetSmallIcon(Resource.Mipmap.appicon)
                 .SetContentTitle("Будильник от NoLate")
                 .SetContentText("Пора выходить!")
                 .SetPriority(NotificationCompat.PriorityHigh)
@@ -204,7 +204,7 @@ public class TrafficService : Service
         var notificationBuilder = new NotificationCompat.Builder(context, channelId)
         .SetContentTitle("NoLate активен")
         .SetContentText("Слежу за пробками...")
-        .SetSmallIcon(iconResId);
+        .SetSmallIcon(Resource.Mipmap.appicon);
 
         var notification = notificationBuilder.Build();
 
