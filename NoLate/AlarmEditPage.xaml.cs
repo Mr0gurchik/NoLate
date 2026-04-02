@@ -12,6 +12,7 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
     private HashSet<int> _selectedDays = new HashSet<int>();
     public string? CurrentLat { get; set; }
     public string? CurrentLon { get; set; }
+    private bool _isAlarmLoaded = false;
     private double _selectedLat;
     private double _selectedLon;
     private string? _selectedAddress;
@@ -146,6 +147,8 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
     // Загрузка буд при редакт
     private async void LoadAlarm(string id)
     {
+        if (_isAlarmLoaded) return;
+
         if (int.TryParse(id, out int alarmId))
         {
             var alarm = await _database.GetAlarmAsync(alarmId);
@@ -163,7 +166,8 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
                 // Восстанавливаем данные о месте
                 _selectedLat = alarm.ToLat ?? 0;
                 _selectedLon = alarm.ToLon ?? 0;
-                // Восстанавливаем адрес (если он не сохранен отдельно, пишем заглушку или берем название)
+                _selectedAddress = alarm.Mesto;
+
                 _selectedDays.Clear();
                 if (!string.IsNullOrEmpty(alarm.RepeatingDays))
                 {
@@ -175,10 +179,10 @@ public partial class AlarmEditPage : ContentPage, IQueryAttributable
                     }
                     RepeatHintLabel.Text = "Будильник будет повторяться";
                 }
-                // Обновляем метку адреса
-                AddressLabel.Text = _selectedLat != 0
-                ? "Координаты сохранены"
-                : "Адрес не выбран";
+
+                AddressLabel.Text = _selectedLat != 0 ? "Координаты сохранены" : "Адрес не выбран";
+
+                _isAlarmLoaded = true;
             }
         }
     }
